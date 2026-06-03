@@ -1,0 +1,15 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Node
+node_modules/
+
+# Build
+bin/
+obj/
+
+# IDE
+.vs/
