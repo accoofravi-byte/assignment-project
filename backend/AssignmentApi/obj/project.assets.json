@@ -2884,11 +2884,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\AssignmentApi.csproj",
+      "projectUniqueName": "c:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\AssignmentApi.csproj",
       "projectName": "AssignmentApi",
-      "projectPath": "C:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\AssignmentApi.csproj",
+      "projectPath": "c:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\AssignmentApi.csproj",
       "packagesPath": "C:\\Users\\ravivishwakarma\\.nuget\\packages\\",
-      "outputPath": "C:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\obj\\",
+      "outputPath": "c:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\ravivishwakarma\\AppData\\Roaming\\NuGet\\NuGet.Config"
