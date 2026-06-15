@@ -59,7 +59,7 @@ jobs:
         run: |
           docker build \
             -t assignment-ui \
-            ./frontend
+            ./frontend/assignment-ui
 
       - name: Tag UI Docker Image
         run: |
