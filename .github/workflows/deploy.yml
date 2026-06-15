@@ -1,43 +1,69 @@
-name: Build and Push Docker Image to AWS ECR
+name: Build Push Deploy ECS
 
 on:
   push:
     branches:
       - main
 
+env:
+  AWS_REGION: ap-south-1
+  ECR_REPOSITORY: assignment-api
+  ECS_CLUSTER: assignment-cluster
+  ECS_SERVICE: assignment-service
+
 jobs:
-  build-and-push:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
-      - name: Checkout Repository
+
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Configure AWS credentials
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.300
+
+      - name: Restore Packages
+        run: dotnet restore ./backend/AssignmentApi/AssignmentApi.csproj
+
+      - name: Build Project
+        run: dotnet build ./backend/AssignmentApi/AssignmentApi.csproj --configuration Release --no-restore
+
+      - name: Publish Project
+        run: dotnet publish ./backend/AssignmentApi/AssignmentApi.csproj -c Release -o publish
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
+          aws-region: ${{ env.AWS_REGION }}
 
-      # 3. Login to Amazon ECR
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 4. Build Docker image
       - name: Build Docker Image
         run: |
-          docker build -t assignment-api ./backend/AssignmentApi
+          docker build \
+          -t $ECR_REPOSITORY \
+          ./backend/AssignmentApi
 
-      # 5. Tag Docker image
       - name: Tag Docker Image
         run: |
-          docker tag assignment-api:latest ${{ steps.login-ecr.outputs.registry }}/assignment-api:latest
+          docker tag $ECR_REPOSITORY:latest \
+          ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
 
-      # 6. Push Docker image to ECR
       - name: Push Docker Image
         run: |
-          docker push ${{ steps.login-ecr.outputs.registry }}/assignment-api:latest
+          docker push \
+          ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
+
+      - name: Force ECS Deployment
+        run: |
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --force-new-deployment

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\AssignmentApi.csproj": {}
+    "C:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\AssignmentApi.csproj": {}
   },
   "projects": {
-    "c:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\AssignmentApi.csproj": {
+    "C:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\AssignmentApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\AssignmentApi.csproj",
+        "projectUniqueName": "C:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\AssignmentApi.csproj",
         "projectName": "AssignmentApi",
-        "projectPath": "c:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\AssignmentApi.csproj",
+        "projectPath": "C:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\AssignmentApi.csproj",
         "packagesPath": "C:\\Users\\ravivishwakarma\\.nuget\\packages\\",
-        "outputPath": "c:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\obj\\",
+        "outputPath": "C:\\PAP Assignment\\assignment-project\\backend\\AssignmentApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\ravivishwakarma\\AppData\\Roaming\\NuGet\\NuGet.Config"

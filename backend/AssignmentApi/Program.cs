@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using AssignmentApi.DTOs;
+using AssignmentApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.WebHost.UseUrls("http://0.0.0.0:8080");
-
-builder.Services.AddControllers();
+//builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -50,9 +50,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             "DefaultConnection"
         )
     );
-
-    var conn = builder.Configuration.GetConnectionString("DefaultConnection");
-Console.WriteLine("CONN STRING => " + conn);
 });
 
 builder.Services.AddScoped<JwtService>();
@@ -96,19 +93,13 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
 
-// Trust forwarded headers (X-Forwarded-For, X-Forwarded-Proto) from reverse proxies / load balancers
 var forwardedOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 };
-// Clear known networks to allow forwarding from ALB/NGINX in default setups
 forwardedOptions.KnownIPNetworks.Clear();
 forwardedOptions.KnownProxies.Clear();
 app.UseForwardedHeaders(forwardedOptions);
@@ -121,15 +112,87 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.MapControllers();
-
-// Simple health endpoint used by ALB / Docker HEALTHCHECK
 app.MapGet("/healthz", () => Results.Ok("OK"));
 
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    db.Database.Migrate();    
 }
 
+app.MapPost("/api/auth/login", (LoginDto dto, JwtService JwtService, ILogger<Program> logger) =>
+{
+    try
+    {
+        Console.WriteLine($"Received Username: {dto.Username}");
+        Console.WriteLine($"Received Password: {dto.Password}");        
+
+        var userName = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(dto.Username));
+        var password = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(dto.Password));
+
+        Console.WriteLine($"Decoded Username: {userName}");
+        Console.WriteLine($"Decoded Password: {password}");
+
+        if(userName == "admin" && password == "admin123")
+        {
+            var token = JwtService.GenerateToken(dto.Username);
+            logger.LogInformation("User {Username} logged in successfully", dto.Username);
+            return Results.Ok(new { token });
+        }
+        else
+        {
+            logger.LogWarning("Failed login attempt for user {Username}", dto.Username);
+            return Results.Unauthorized();
+        } 
+    }
+    catch (Exception)
+    {
+        return Results.BadRequest("Invalid credentials");
+    }
+
+      
+    
+}).AllowAnonymous();
+
+app.MapGet("/api/products", async (AppDbContext db)=>
+{
+    return await db.Products.ToListAsync();
+}).RequireAuthorization();
+
+app.MapGet("/api/products/{id}", async (int id, AppDbContext db) =>
+{
+    var products = await db.Products.FindAsync(id);
+    return products is null ? Results.NotFound() : Results.Ok(products);
+}).RequireAuthorization();
+
+app.MapPost("/api/products", async (Product product, AppDbContext db) =>
+{
+    db.Products.Add(product);
+    await db.SaveChangesAsync();
+    return Results.Created($"/api/products/{product.Id}", product);
+}).RequireAuthorization();
+
+app.MapPut("/api/products/{id}", async (int id, Product product, AppDbContext db) =>
+{
+    var existing = await db.Products.FindAsync(id);
+    if (existing is null) return Results.NotFound();
+
+    existing.Name = product.Name;
+    existing.Price = product.Price;
+    existing.Quantity = product.Quantity;
+
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+}).RequireAuthorization();
+
+app.MapDelete("/api/products/{id}", async (int id, AppDbContext db) =>
+{
+    var existing = await db.Products.FindAsync(id);
+    if (existing is null) return Results.NotFound();
+
+    db.Products.Remove(existing);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+}).RequireAuthorization();
+    
 app.Run();

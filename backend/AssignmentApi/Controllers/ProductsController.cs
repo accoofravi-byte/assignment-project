@@ -8,7 +8,7 @@ namespace AssignmentApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-//[Authorize]
+[Authorize]
 [AllowAnonymous]
 public class ProductsController : ControllerBase
 {
@@ -32,6 +32,7 @@ public class ProductsController : ControllerBase
 
         if (product == null)
             return NotFound();
+            
 
         return Ok(product);
     }

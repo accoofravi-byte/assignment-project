@@ -18,8 +18,9 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public IActionResult Login(LoginDto dto)
     {
-        if (dto.Username == "admin" &&
-            dto.Password == "admin123")
+        var username = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(dto.Username));
+        var password = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(dto.Password));
+        if (username == "admin" && password == "admin123")
         {
             var token = _jwtService.GenerateToken(dto.Username);
 
