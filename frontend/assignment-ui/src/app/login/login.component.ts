@@ -32,6 +32,8 @@ export class LoginComponent {
       password: btoa(this.model.password)
     };
 
+    console.log('Base64 Encoded Payload:', payload);
+
     this.auth.login(payload)
     .subscribe({
       next: (response: any) => {
