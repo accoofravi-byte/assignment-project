@@ -1,4 +1,4 @@
-name: Build Push and Deploy to ECS
+name: Build Push and Deploy ECS
 
 on:
   push:
@@ -14,11 +14,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout source
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Configure AWS credentials
+      - name: Debug Structure
+        run: |
+          pwd
+          find . -name Dockerfile
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -26,56 +29,57 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # Login to ECR
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      ##########################################################
-      # BUILD AND PUSH API IMAGE
-      ##########################################################
+      #################################################
+      # API IMAGE
+      #################################################
 
       - name: Build API Docker Image
         run: |
           docker build \
+            -f ./backend/AssignmentApi/Dockerfile \
             -t assignment-api \
             ./backend/AssignmentApi
 
-      - name: Tag API Docker Image
+      - name: Tag API Image
         run: |
           docker tag assignment-api:latest \
           ${{ steps.login-ecr.outputs.registry }}/assignment-api:latest
 
-      - name: Push API Docker Image
+      - name: Push API Image
         run: |
           docker push \
           ${{ steps.login-ecr.outputs.registry }}/assignment-api:latest
 
-      ##########################################################
-      # BUILD AND PUSH UI IMAGE
-      ##########################################################
+      #################################################
+      # UI IMAGE
+      #################################################
 
       - name: Build UI Docker Image
         run: |
           docker build \
+            -f ./frontend/assignment-ui/Dockerfile \
             -t assignment-ui \
             ./frontend/assignment-ui
 
-      - name: Tag UI Docker Image
+      - name: Tag UI Image
         run: |
           docker tag assignment-ui:latest \
           ${{ steps.login-ecr.outputs.registry }}/assignment-ui:latest
 
-      - name: Push UI Docker Image
+      - name: Push UI Image
         run: |
           docker push \
           ${{ steps.login-ecr.outputs.registry }}/assignment-ui:latest
 
-      ##########################################################
-      # DEPLOY API SERVICE
-      ##########################################################
+      #################################################
+      # ECS DEPLOYMENT
+      #################################################
 
-      - name: Force API Deployment
+      - name: Deploy API Service
         run: |
           aws ecs update-service \
             --cluster assignment-cluster \
@@ -83,11 +87,7 @@ jobs:
             --force-new-deployment \
             --region ap-south-1
 
-      ##########################################################
-      # DEPLOY UI SERVICE
-      ##########################################################
-
-      - name: Force UI Deployment
+      - name: Deploy UI Service
         run: |
           aws ecs update-service \
             --cluster assignment-cluster \
