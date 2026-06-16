@@ -6,4 +6,8 @@
     <input type="password" class="form-control mb-2" placeholder="Password" [(ngModel)]="model.password">
     
     <button class="btn btn-primary" (click)="login()">Login</button>
+
+    <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+    </div>
 </div>

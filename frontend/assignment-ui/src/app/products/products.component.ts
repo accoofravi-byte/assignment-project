@@ -35,6 +35,8 @@ constructor(
   private router: Router
 ) {}
 
+successMessage = '';
+
 ngOnInit(): void {
   if (this.auth.getToken()) {
     this.router.navigate(['/products']);
@@ -73,6 +75,7 @@ save() {
       this.product.id, 
       this.product)
     .subscribe(() => {
+      this.showSuccess('Product updated successfully!');
       this.loadProducts();
       this.resetForm();
     });
@@ -81,6 +84,7 @@ save() {
       this.productService.createProduct(
         this.product
       ).subscribe(() => {
+        this.showSuccess('Product saved successfully!');
         this.loadProducts();
         this.resetForm();
       });
@@ -94,6 +98,8 @@ edit(product: any) {
 delete(id: number) {
   this.productService.deleteProduct(id)
   .subscribe(() => {
+    this.showSuccess('Product deleted successfully!');
+
     this.loadProducts();
       console.log('Products after reload:', this.products);
   });
@@ -105,8 +111,16 @@ resetForm() {
     name: '',
     price: 0,
     quantity: 0
-  };
+  };  
 }
+
+showSuccess(message: string){
+    this.successMessage = message;
+    setTimeout(() => {
+      this.successMessage = '';
+      this.cdr.detectChanges();
+    }, 3000);
+  }
 
 logout() {
   this.auth.logOut();

@@ -2,11 +2,13 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -17,10 +19,13 @@ export class LoginComponent {
     password: ''
   };
 
+  errorMessage = '';
+
 
   constructor(
     private auth: AuthService, 
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   login() {
@@ -37,6 +42,7 @@ export class LoginComponent {
     this.auth.login(payload)
     .subscribe({
       next: (response: any) => {
+         this.errorMessage = '';
         console.log('Login Success', response);
         console.log('Response', response);
 
@@ -53,6 +59,7 @@ export class LoginComponent {
       },
 
       error: (err) => {
+        this.showError('Invalid username or password');
         console.error('LOGIN ERROR', err);
 
         if(err.error){
@@ -64,5 +71,13 @@ export class LoginComponent {
         console.log('Url:', err.url)
       }
     });
+  }
+
+  showError(message: string){
+    this.errorMessage = message;
+    setTimeout(() => {
+      this.errorMessage = '';
+      this.cdr.detectChanges();
+    }, 3000);
   }
 }

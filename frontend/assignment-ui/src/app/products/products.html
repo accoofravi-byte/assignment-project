@@ -5,6 +5,10 @@
     <input class="form-control mb-2" placeholder="Price" [(ngModel)]="product.price">
     <input class="form-control mb-2" placeholder="Quantity" [(ngModel)]="product.quantity">
     <button class="btn btn-success mb-3" (click)="save()">Save</button>
+
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
     
     <table class="table table-bordered">
         <thead>
